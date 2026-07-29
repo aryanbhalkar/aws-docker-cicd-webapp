@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AWS Docker CI/CD Pipeline</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+            background: #f3f4f6;
+        }
+
+        .card {
+            width: min(90%, 760px);
+            padding: 48px;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.10);
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            font-size: 2.4rem;
+        }
+
+        p {
+            color: #4b5563;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 18px;
+            color: #166534;
+            font-weight: bold;
+            background: #dcfce7;
+            border-radius: 999px;
+        }
+
+        .details {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <h1>Automated AWS CI/CD Pipeline</h1>
+
+        <p>
+            This Dockerized Flask application is automatically tested,
+            built, stored in Amazon ECR and deployed to Amazon ECS
+            Fargate through AWS CodePipeline.
+        </p>
+
+        <div class="status">
+            Application is running successfully
+        </div>
+
+        <div class="details">
+            <p><strong>Environment:</strong> {{ environment }}</p>
+            <p><strong>Application version:</strong> {{ version }}</p>
+            <p><strong>AWS Region:</strong> {{ region }}</p>
+        </div>
+    </main>
+</body>
+</html>
