@@ -8,81 +8,1065 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Automated AWS Docker CI/CD Pipeline</title>
+    <meta
+        name="description"
+        content="Automated CI/CD pipeline for a Dockerized Flask application deployed on Amazon ECS Fargate."
+    >
+
+    <title>AWS CI/CD Pipeline Project</title>
 
     <style>
+        :root {
+            --background: #07111f;
+            --surface: #0d1a2b;
+            --surface-light: #14243a;
+            --border: rgba(148, 163, 184, 0.22);
+            --text: #f8fafc;
+            --muted: #a8b4c7;
+            --blue: #38bdf8;
+            --purple: #a78bfa;
+            --orange: #fb923c;
+            --green: #4ade80;
+            --pink: #f472b6;
+            --shadow: 0 20px 55px rgba(0, 0, 0, 0.35);
+        }
+
         * {
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #111827;
-            background: #f3f4f6;
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(56, 189, 248, 0.12),
+                    transparent 34%
+                ),
+                radial-gradient(
+                    circle at top right,
+                    rgba(167, 139, 250, 0.12),
+                    transparent 32%
+                ),
+                var(--background);
         }
 
-        .card {
-            width: min(90%, 760px);
-            padding: 48px;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 17, 31, 0.84);
+            backdrop-filter: blur(16px);
+        }
+
+        .navbar-inner {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--blue);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .hero {
+            padding: 92px 0 70px;
             text-align: center;
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.10);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(74, 222, 128, 0.28);
+            border-radius: 999px;
+            color: #bbf7d0;
+            background: rgba(74, 222, 128, 0.08);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 18px rgba(74, 222, 128, 0.95);
         }
 
         h1 {
-            margin: 0 0 18px;
-            font-size: 2.4rem;
+            max-width: 900px;
+            margin: 0 auto;
+            font-size: clamp(2.5rem, 6vw, 5.2rem);
+            line-height: 1.02;
+            letter-spacing: -0.055em;
         }
 
-        p {
-            color: #4b5563;
-            font-size: 1.1rem;
+        .gradient-text {
+            color: transparent;
+            background:
+                linear-gradient(
+                    90deg,
+                    #f8fafc,
+                    #7dd3fc,
+                    #c4b5fd
+                );
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        .hero-description {
+            max-width: 770px;
+            margin: 26px auto 0;
+            color: var(--muted);
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            margin-top: 34px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 20px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-weight: 800;
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button-primary {
+            color: #06111d;
+            background: linear-gradient(90deg, #38bdf8, #a78bfa);
+        }
+
+        .button-secondary {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .meta-grid {
+            margin-top: 54px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .meta-card,
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255, 255, 255, 0.055),
+                    rgba(255, 255, 255, 0.018)
+                );
+            box-shadow: var(--shadow);
+        }
+
+        .meta-card {
+            padding: 22px;
+            text-align: left;
+        }
+
+        .meta-label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .meta-value {
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        section {
+            padding: 72px 0;
+        }
+
+        .section-header {
+            max-width: 760px;
+            margin-bottom: 34px;
+        }
+
+        .section-kicker {
+            margin-bottom: 10px;
+            color: var(--blue);
+            font-size: 0.84rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            letter-spacing: -0.04em;
+        }
+
+        .section-description {
+            margin: 16px 0 0;
+            color: var(--muted);
+            line-height: 1.75;
+        }
+
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .workflow-card {
+            position: relative;
+            min-height: 200px;
+            padding: 22px 18px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+        }
+
+        .workflow-card:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            top: 50%;
+            right: -18px;
+            z-index: 5;
+            color: var(--blue);
+            font-size: 1.35rem;
+            font-weight: 900;
+            transform: translateY(-50%);
+        }
+
+        .workflow-number {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 10px;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--blue);
+            font-weight: 900;
+        }
+
+        .workflow-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.04rem;
+        }
+
+        .workflow-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .service-card {
+            padding: 25px;
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 14px;
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+
+        .icon-blue {
+            color: #7dd3fc;
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        .icon-purple {
+            color: #c4b5fd;
+            background: rgba(167, 139, 250, 0.12);
+        }
+
+        .icon-orange {
+            color: #fdba74;
+            background: rgba(251, 146, 60, 0.12);
+        }
+
+        .icon-green {
+            color: #86efac;
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        .icon-pink {
+            color: #f9a8d4;
+            background: rgba(244, 114, 182, 0.12);
+        }
+
+        .service-card h3 {
+            margin: 0 0 10px;
+        }
+
+        .service-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .pipeline-panel {
+            padding: 30px;
+        }
+
+        .pipeline-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .pipeline-stage {
+            position: relative;
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .pipeline-stage:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            top: 50%;
+            right: -20px;
+            z-index: 4;
+            color: var(--purple);
+            font-size: 1.55rem;
+            font-weight: 900;
+            transform: translateY(-50%);
+        }
+
+        .stage-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .stage-status {
+            color: var(--green);
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .stage-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .stage-list li {
+            position: relative;
+            margin-top: 11px;
+            padding-left: 22px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        .stage-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-weight: 900;
+        }
+
+        .architecture-box {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .architecture-flow {
+            min-width: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .architecture-node {
+            width: 132px;
+            min-height: 122px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .architecture-arrow {
+            color: var(--blue);
+            font-size: 1.7rem;
+            font-weight: 900;
+        }
+
+        .architecture-node strong {
+            font-size: 0.92rem;
+        }
+
+        .architecture-node small {
+            color: var(--muted);
+        }
+
+        .status-panel {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+        }
+
+        .status-card {
+            padding: 28px;
+        }
+
+        .success-banner {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 22px;
+            padding: 16px;
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            border-radius: 14px;
+            color: #bbf7d0;
+            background: rgba(74, 222, 128, 0.08);
+            font-weight: 800;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .details-table td {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .details-table td:first-child {
+            color: var(--muted);
+        }
+
+        .details-table td:last-child {
+            text-align: right;
+            font-weight: 800;
+        }
+
+        .health-code {
+            overflow-x: auto;
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: #c4f1ff;
+            background: #020817;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9rem;
             line-height: 1.7;
         }
 
-        .status {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 18px;
-            color: #166534;
-            font-weight: bold;
-            background: #dcfce7;
-            border-radius: 999px;
+        .footer {
+            margin-top: 60px;
+            padding: 32px 0;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            text-align: center;
         }
 
-        .details {
-            margin-top: 28px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e7eb;
+        @media (max-width: 1050px) {
+            .workflow {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .workflow-card:nth-child(3)::after {
+                display: none;
+            }
+
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .navbar-inner {
+                min-height: 64px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 70px;
+            }
+
+            .meta-grid,
+            .services-grid,
+            .pipeline-row,
+            .status-panel,
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-card::after,
+            .pipeline-stage::after {
+                display: none;
+            }
+
+            section {
+                padding: 55px 0;
+            }
         }
     </style>
 </head>
 
 <body>
-    <main class="card">
-        <h1>Automated AWS CI/CD Pipeline</h1>
+    <header class="navbar">
+        <div class="container navbar-inner">
+            <a class="brand" href="#home">
+                <span class="brand-mark">AWS</span>
+                <span>Docker CI/CD Pipeline</span>
+            </a>
 
-        <p>
-            This Dockerized Flask application is automatically tested,
-            built, stored in Amazon ECR and deployed to Amazon ECS
-            Fargate through AWS CodePipeline.
-        </p>
-
-        <div class="status">
-            Application is running successfully
+            <nav class="nav-links" aria-label="Main navigation">
+                <a href="#workflow">Workflow</a>
+                <a href="#services">Services</a>
+                <a href="#pipeline">Pipeline</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#status">Status</a>
+            </nav>
         </div>
+    </header>
 
-        <div class="details">
-            <p><strong>Environment:</strong> {{ environment }}</p>
-            <p><strong>Application version:</strong> {{ version }}</p>
-            <p><strong>AWS Region:</strong> {{ region }}</p>
-        </div>
+    <main>
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="eyebrow">
+                    <span class="status-dot"></span>
+                    Deployment successful
+                </div>
+
+                <h1>
+                    <span class="gradient-text">
+                        Automated AWS CI/CD Pipeline
+                    </span>
+                </h1>
+
+                <p class="hero-description">
+                    A production-style CI/CD implementation for a Dockerized
+                    Flask web application. Every commit pushed to GitHub is
+                    automatically tested, containerized, stored in Amazon ECR
+                    and deployed to Amazon ECS Fargate through AWS CodePipeline.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#architecture">
+                        View Architecture
+                    </a>
+
+                    <a class="button button-secondary" href="/health">
+                        Check Health Endpoint
+                    </a>
+                </div>
+
+                <div class="meta-grid">
+                    <article class="meta-card">
+                        <span class="meta-label">Environment</span>
+                        <span class="meta-value">{{ environment }}</span>
+                    </article>
+
+                    <article class="meta-card">
+                        <span class="meta-label">Application Version</span>
+                        <span class="meta-value">{{ version }}</span>
+                    </article>
+
+                    <article class="meta-card">
+                        <span class="meta-label">AWS Region</span>
+                        <span class="meta-value">{{ region }}</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-kicker">End-to-end delivery</div>
+
+                    <h2>How the automated workflow operates</h2>
+
+                    <p class="section-description">
+                        The pipeline transforms every approved source-code
+                        change into a tested Docker image and safely deploys it
+                        as a new ECS task behind an Application Load Balancer.
+                    </p>
+                </div>
+
+                <div class="workflow">
+                    <article class="workflow-card">
+                        <div class="workflow-number">1</div>
+                        <h3>Code Commit</h3>
+                        <p>
+                            The developer commits application or infrastructure
+                            changes and pushes them to the GitHub main branch.
+                        </p>
+                    </article>
+
+                    <article class="workflow-card">
+                        <div class="workflow-number">2</div>
+                        <h3>Source Trigger</h3>
+                        <p>
+                            GitHub App integration detects the new commit and
+                            automatically starts AWS CodePipeline.
+                        </p>
+                    </article>
+
+                    <article class="workflow-card">
+                        <div class="workflow-number">3</div>
+                        <h3>Build and Test</h3>
+                        <p>
+                            AWS CodeBuild installs dependencies, runs pytest and
+                            creates the production Docker image.
+                        </p>
+                    </article>
+
+                    <article class="workflow-card">
+                        <div class="workflow-number">4</div>
+                        <h3>Image Storage</h3>
+                        <p>
+                            The tested image receives a commit-based tag and is
+                            securely pushed to Amazon ECR.
+                        </p>
+                    </article>
+
+                    <article class="workflow-card">
+                        <div class="workflow-number">5</div>
+                        <h3>ECS Deployment</h3>
+                        <p>
+                            CodePipeline updates the ECS service with a new task
+                            definition revision and Fargate task.
+                        </p>
+                    </article>
+
+                    <article class="workflow-card">
+                        <div class="workflow-number">6</div>
+                        <h3>Health Validation</h3>
+                        <p>
+                            The ALB target group checks the health endpoint
+                            before routing production traffic to the new task.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="services">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-kicker">Technology stack</div>
+
+                    <h2>AWS services used in the project</h2>
+
+                    <p class="section-description">
+                        Each service has a clear responsibility, creating a
+                        modular delivery system that is easier to operate,
+                        monitor and extend.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+                    <article class="card service-card">
+                        <div class="service-icon icon-blue">GH</div>
+                        <h3>GitHub Repository</h3>
+                        <p>
+                            Stores the Flask source code, tests, Dockerfile and
+                            buildspec configuration. Pushes to main trigger the
+                            release workflow.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-purple">CP</div>
+                        <h3>AWS CodePipeline</h3>
+                        <p>
+                            Orchestrates the Source, Build and Deploy stages and
+                            moves artifacts safely between each stage.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-blue">CB</div>
+                        <h3>AWS CodeBuild</h3>
+                        <p>
+                            Installs dependencies, runs pytest, builds and tags
+                            the Docker image and pushes it to ECR.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-orange">ECR</div>
+                        <h3>Amazon ECR</h3>
+                        <p>
+                            Stores private container images using both the
+                            latest tag and traceable Git commit-based tags.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-orange">ECS</div>
+                        <h3>Amazon ECS Fargate</h3>
+                        <p>
+                            Runs the container without requiring EC2 server
+                            management, while the ECS service maintains the
+                            required task count.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-purple">ALB</div>
+                        <h3>Application Load Balancer</h3>
+                        <p>
+                            Provides the public application endpoint and routes
+                            HTTP traffic only to healthy ECS targets.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-green">TG</div>
+                        <h3>Healthy Target Group</h3>
+                        <p>
+                            Registers Fargate task IP addresses and continuously
+                            evaluates the application through the health route.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-pink">CW</div>
+                        <h3>Amazon CloudWatch</h3>
+                        <p>
+                            Centralizes Gunicorn, application and CodeBuild logs
+                            for troubleshooting and operational monitoring.
+                        </p>
+                    </article>
+
+                    <article class="card service-card">
+                        <div class="service-icon icon-green">IAM</div>
+                        <h3>AWS IAM</h3>
+                        <p>
+                            Grants the minimum permissions required for ECS
+                            image pulls, CodeBuild image pushes, logs and
+                            pipeline artifact access.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="pipeline">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-kicker">Pipeline execution</div>
+
+                    <h2>Source → Build → Deploy</h2>
+
+                    <p class="section-description">
+                        A successful release requires all three stages to pass.
+                        A failed automated test stops the workflow before the
+                        application reaches production.
+                    </p>
+                </div>
+
+                <div class="card pipeline-panel">
+                    <div class="pipeline-row">
+                        <article class="pipeline-stage">
+                            <div class="stage-top">
+                                <h3>Source</h3>
+                                <span class="stage-status">Succeeded</span>
+                            </div>
+
+                            <ul class="stage-list">
+                                <li>GitHub via GitHub App</li>
+                                <li>Main branch monitored</li>
+                                <li>Source artifact generated</li>
+                            </ul>
+                        </article>
+
+                        <article class="pipeline-stage">
+                            <div class="stage-top">
+                                <h3>Build</h3>
+                                <span class="stage-status">Succeeded</span>
+                            </div>
+
+                            <ul class="stage-list">
+                                <li>Python dependencies installed</li>
+                                <li>Automated pytest tests passed</li>
+                                <li>Docker image built</li>
+                                <li>Image pushed to ECR</li>
+                            </ul>
+                        </article>
+
+                        <article class="pipeline-stage">
+                            <div class="stage-top">
+                                <h3>Deploy</h3>
+                                <span class="stage-status">Succeeded</span>
+                            </div>
+
+                            <ul class="stage-list">
+                                <li>Image definitions processed</li>
+                                <li>ECS task revision created</li>
+                                <li>Fargate task started</li>
+                                <li>Healthy target receives traffic</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-kicker">Cloud architecture</div>
+
+                    <h2>From code commit to running application</h2>
+
+                    <p class="section-description">
+                        This simplified architecture shows the primary code,
+                        image, deployment and application traffic flow.
+                    </p>
+                </div>
+
+                <div class="card architecture-box">
+                    <div class="architecture-flow">
+                        <div class="architecture-node">
+                            <strong>Developer</strong>
+                            <small>Git push</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>GitHub</strong>
+                            <small>Source repository</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>CodePipeline</strong>
+                            <small>Workflow orchestration</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>CodeBuild</strong>
+                            <small>Test and Docker build</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>Amazon ECR</strong>
+                            <small>Container registry</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>ECS Fargate</strong>
+                            <small>Container runtime</small>
+                        </div>
+
+                        <span class="architecture-arrow">→</span>
+
+                        <div class="architecture-node">
+                            <strong>ALB</strong>
+                            <small>Public HTTP endpoint</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="status">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-kicker">Live deployment</div>
+
+                    <h2>Application and health status</h2>
+
+                    <p class="section-description">
+                        Runtime information is supplied by Flask environment
+                        variables configured in the ECS task definition.
+                    </p>
+                </div>
+
+                <div class="status-panel">
+                    <article class="card status-card">
+                        <div class="success-banner">
+                            <span class="status-dot"></span>
+                            Application is running successfully
+                        </div>
+
+                        <table class="details-table">
+                            <tbody>
+                                <tr>
+                                    <td>Environment</td>
+                                    <td>{{ environment }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Application version</td>
+                                    <td>{{ version }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>AWS Region</td>
+                                    <td>{{ region }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Compute platform</td>
+                                    <td>Amazon ECS Fargate</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Container port</td>
+                                    <td>5000</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Target health</td>
+                                    <td style="color: var(--green);">
+                                        Healthy
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+
+                    <article class="card status-card">
+                        <h3>/health endpoint</h3>
+
+                        <p class="section-description">
+                            The Application Load Balancer uses this endpoint to
+                            determine whether the running task is ready to
+                            receive traffic.
+                        </p>
+
+                        <pre class="health-code">{
+  "status": "healthy",
+  "service": "aws-docker-cicd-webapp",
+  "region": "{{ region }}"
+}</pre>
+
+                        <a
+                            class="button button-secondary"
+                            href="/health"
+                            style="margin-top: 18px;"
+                        >
+                            Open Health Endpoint
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <footer class="footer">
+        <div class="container">
+            Automated CI/CD Pipeline for a Dockerized Flask Application
+            on AWS · Region: {{ region }}
+        </div>
+    </footer>
 </body>
 </html>
